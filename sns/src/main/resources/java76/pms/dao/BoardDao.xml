@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="java76.pms.dao.BoardDao">
+	<resultMap type="board" id="boardMap">
+		<result column="afile" property="attachFile" />
+		<result column="cr_dt" property="createdDate" />
+		<result column="pwd" property="password" />
+	</resultMap>
+
+<sql id="select_inc">
+  select no,
+    title,
+    views,
+    content,
+    cr_dt,
+    afile,
+    photo,
+    writer,
+    pwd
+</sql>
+
+
+	<select id="selectList" resultMap="boardMap" parameterType="map">
+	<include refid="select_inc"/>
+		from sns
+		order by
+		<choose>
+			<when test="keyword == 'title'">title </when>
+			<when test="keyword == 'views'">views </when>
+			<otherwise>
+				no
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="align == 'asc'">asc </when>
+			<otherwise>desc </otherwise>
+		</choose>
+		limit #{startIndex}, #{length}
+	</select>
+
+	<insert id="insert" parameterType="board">
+		insert into
+		sns(title,content,pwd,cr_dt,afile,writer,photo)
+		values(#{title},#{content},#{password},now(),#{attachFile},#{writer},#{photo})
+	</insert>
+
+
+  <select id="selectOne" resultMap="boardMap" parameterType="int">
+    <include refid="select_inc"/>
+    from sns
+    where no=#{no}
+  </select>
+
+	<delete id="delete" parameterType="map">
+		delete from sns where
+		no=#{no}
+    and (pwd
+    is null or pwd=#{password})
+	</delete>
+
+	<update id="update" parameterType="board">
+		update sns set
+		title=#{title},
+		content=#{content},
+		cr_dt=now(),
+		afile=#{attachFile},
+		photo=#{photo}
+		where no=#{no}
+		and (pwd
+		is null or pwd=#{password})
+	</update>
+	
+	<update id="viewUpdate" parameterType="int">
+	update sns set views=views+1 where no=#{no}
+	</update>
+
+</mapper>
